@@ -114,11 +114,21 @@ function markNav(page) {
   $("moreBtn").classList.toggle("on", moreOn);
 }
 
-function updateSideCount() {
-  const n = STUDY.filter(p => isDone(p.id)).length;
-  $("sideDone").textContent = n;
-  $("sideDoneL").textContent = "of " + STUDY.length + " pages done";
+/* ---------- end-sem countdown (date is tentative; change EXAM_DATE when the date sheet is out) ---------- */
+const EXAM_DATE = "2026-12-15";
+function daysToExam() {
+  const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" }).format(new Date());   // YYYY-MM-DD in IST
+  const utc = s => { const [y, m, d] = s.split("-").map(Number); return Date.UTC(y, m - 1, d); };
+  return Math.round((utc(EXAM_DATE) - utc(today)) / 864e5);
 }
+function updateCountdowns() {
+  const days = daysToExam();
+  const [num, label] = days > 1 ? [days, "days to end-sem"] : days === 1 ? ["1", "day to end-sem"] : days === 0 ? ["0", "end-sem is today"] : ["✓", "end-sem is over"];
+  [["cdnum", "cdlabel"], ["sidecd", "sidecdl"]].forEach(([n, l]) => { $(n).textContent = num; $(l).textContent = label; });
+  $("countdown").textContent = days > 1 ? days + " days to go" : days === 1 ? "Tomorrow" : days === 0 ? "Today" : "Done";
+}
+updateCountdowns();
+setInterval(updateCountdowns, 60 * 60 * 1000);
 
 /* ---------- routing ---------- */
 function route() {
@@ -197,7 +207,7 @@ $("doneBtn").addEventListener("click", e => {
   const page = e.currentTarget.dataset.page;
   if (isDone(page)) delete done[page]; else done[page] = Date.now();
   save("dip-done", done);
-  paintDone(page); markNav(page); updateSideCount();
+  paintDone(page); markNav(page);
 });
 
 function renderPager(page) {
@@ -242,7 +252,6 @@ function renderHome() {
     a.dataset.pct = (f.n / 6 * 100).toFixed(1);
     fq.append(a);
   });
-  updateSideCount();
   window.dipIcons && window.dipIcons();
   requestAnimationFrame(() => requestAnimationFrame(() => {
     fills.forEach(([f, p]) => { f.style.strokeDashoffset = (C * (1 - p)).toFixed(2); });

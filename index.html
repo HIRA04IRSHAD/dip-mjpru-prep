@@ -9,8 +9,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
-<link rel="stylesheet" href="assets/base.css?v=7">
-<link rel="stylesheet" href="assets/dip.css?v=7">
+<link rel="stylesheet" href="assets/base.css?v=8">
+<link rel="stylesheet" href="assets/dip.css?v=8">
 <script>try{var t=localStorage.getItem('dip-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 <script>window.dipIcons=function(){try{if(window.lucide)window.lucide.createIcons({attrs:{"aria-hidden":"true"}})}catch(e){}};</script>
 <script async src="https://cdn.jsdelivr.net/npm/lucide@0.453.0/dist/umd/lucide.min.js" onload="dipIcons()"></script>
@@ -38,7 +38,7 @@
     <a href="#lastnight" data-page="lastnight"><i data-lucide="moon-star"></i><span>Last-night sheet</span></a>
   </nav>
   <div class="side-foot">
-    <div class="side-count"><b id="sideDone">0</b><span id="sideDoneL">of 12 pages done</span></div>
+    <div class="side-count"><b id="sidecd">49</b><span><span id="sidecdl">days to end-sem</span><small class="tent">15 Dec · tentative</small></span></div>
     <a class="side-star" href="https://github.com/arshanalikhan/dip-mjpru-prep" target="_blank" rel="noopener"><i data-lucide="star"></i><span>Star on GitHub</span></a>
     <div class="side-by"><span class="mono-av" aria-hidden="true">AK</span><span><b>Built by Arshan Ali Khan</b><br>B.Tech VII · CSIT · MJPRU</span></div>
     <button class="themebtn" type="button" aria-label="Switch color theme"></button>
@@ -92,16 +92,17 @@
           <a class="btn big" href="#lastnight">Last-night sheet</a>
         </div>
       </div>
-      <div class="countdown-card hist-card">
+      <div class="countdown-card hist-card" aria-live="polite">
         <canvas class="hist-anim" aria-hidden="true"></canvas>
-        <span class="cd-num">6</span>
-        <span class="cd-l">past papers analysed</span>
-        <span class="cd-d">2017 → 2025-26</span>
+        <span class="cd-num" id="cdnum">49</span>
+        <span class="cd-l" id="cdlabel">days to end-sem</span>
+        <span class="cd-d">Tue 15 Dec 2026</span>
+        <span class="tent-tag">Tentative date</span>
       </div>
     </div>
     <dl class="ticket">
-      <div><dt>Paper</dt><dd>70 marks · 3 hours <small>8 questions, attempt any 5</small></dd></div>
-      <div><dt>Each question</dt><dd>14 marks <small>Usually (a) 7 + (b) 7</small></dd></div>
+      <div><dt>End-sem · tentative</dt><dd>Tue 15 Dec 2026 <small id="countdown">49 days to go</small></dd></div>
+      <div><dt>Paper</dt><dd>70 marks · 3 hours <small>Any 5 of 8 questions, 14 marks each</small></dd></div>
       <div><dt>Answer length</dt><dd>4–5 pages <small>Plus at least one diagram</small></dd></div>
       <div><dt>Heaviest unit</dt><dd>Unit 1 <small>Half of the 2025-26 paper</small></dd></div>
     </dl>
@@ -151,6 +152,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
-<script src="assets/app.js?v=7"></script>
+<script src="assets/app.js?v=8"></script>
 </body>
 </html>
