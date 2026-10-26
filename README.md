@@ -17,13 +17,14 @@ Study site for **MJPRU Bareilly · B.Tech VII Semester · Digital Image Processi
 
 ## How it works
 
-A static site with no build step. `index.html` loads `content/<page>.md` for the page in the URL hash and renders it with [marked](https://marked.js.org/); ` ```mermaid ` blocks are drawn with [Mermaid](https://mermaid.js.org/), and `::: ans` / `::: tip` / `::: warn` blocks become styled boxes.
+A static site with no build step, using the same design as [iitm-stats2-prep](https://github.com/arshanalikhan/iitm-stats2-prep): sidebar on desktop, top bar and bottom tabs on phones, light and dark themes. `index.html` holds the shell and the home page; every other page is `content/<page>.md`, loaded for the page in the URL hash and rendered with [marked](https://marked.js.org/). ` ```mermaid ` blocks are drawn with [Mermaid](https://mermaid.js.org/), and `::: ans` / `::: tip` / `::: warn` blocks become styled boxes. Progress ("mark as done") and exam mode are saved in the browser only.
 
 ```text
-index.html          page shell and navigation
-assets/app.js       router, Markdown + diagram rendering, theme toggle
-assets/style.css    light and dark themes
-content/*.md        every page
+index.html          shell (sidebar, phone tabs) and the home page
+assets/base.css     design tokens, shell and home styles shared with iitm-stats2-prep
+assets/dip.css      DIP additions: Markdown pages, diagrams, answer boxes, topic bars
+assets/app.js       router, Markdown + diagrams, progress, exam mode, hero animation
+content/*.md        every other page
 ```
 
 To edit content, change the Markdown in `content/` and push to `main`; GitHub Actions publishes to GitHub Pages. When you change `assets/`, bump the `?v=` number in `index.html` so browsers fetch the new files.
