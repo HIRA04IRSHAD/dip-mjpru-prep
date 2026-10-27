@@ -5,6 +5,7 @@ const PAGES = [
   { id: "analysis", name: "PYQ analysis", group: "start" },
   { id: "pyqs", name: "All past papers", group: "start" },
   { id: "style", name: "How to write answers", group: "start" },
+  { id: "videos", name: "Video lectures", group: "watch" },
   { id: "unit1", name: "Unit 1 · Fundamentals & spatial", group: "unit" },
   { id: "unit2", name: "Unit 2 · Frequency & restoration", group: "unit" },
   { id: "unit3", name: "Unit 3 · Colour & morphology", group: "unit" },
@@ -16,7 +17,7 @@ const PAGES = [
   { id: "lastnight", name: "Last-night sheet", group: "revise" }
 ];
 const byId = Object.fromEntries(PAGES.map(p => [p.id, p]));
-const STUDY = PAGES.filter(p => p.id !== "home");   // the 12 pages that can be marked as done
+const STUDY = PAGES.filter(p => p.id !== "home");   // the 13 pages that can be marked as done
 
 // Topic frequency across the six papers (2017, 2018, 2019, 2025-26 end-sem; 2025 Mid-1, Mid-2).
 const FREQ = [
@@ -88,6 +89,35 @@ function boxes(md) {
     `<div class="box box-${kind}">${title ? `<p class="box-t">${title}</p>` : ""}\n\n${body}\n\n</div>`);
 }
 
+// "@yt <id> | title | channel | duration" lines become a grid of video cards; the player loads only when tapped.
+const escHtml = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+function videos(md) {
+  return md.replace(/(?:^@yt .*(?:\r?\n|$))+/gm, block => {
+    const cards = block.trim().split(/\r?\n/).map(line => {
+      const [id, title, channel, len] = line.slice(4).split("|").map(x => escHtml(x.trim()));
+      return `<button type="button" class="vid" data-yt="${id}" aria-label="Play: ${title} (${channel}, ${len})">` +
+        `<span class="vid-thumb"><img src="https://i.ytimg.com/vi/${id}/mqdefault.jpg" alt="" loading="lazy"><span class="vid-play" aria-hidden="true"></span><span class="vid-len">${len}</span></span>` +
+        `<span class="vid-t">${title}</span><span class="vid-c">${channel}</span></button>`;
+    });
+    return `<div class="vids">${cards.join("")}</div>\n\n`;
+  });
+}
+function playVideo(btn) {
+  const id = btn.dataset.yt, frame = document.createElement("iframe");
+  frame.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0`;
+  frame.title = btn.querySelector(".vid-t").textContent;
+  frame.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+  frame.allowFullscreen = true;
+  const thumb = btn.querySelector(".vid-thumb");
+  const box = document.createElement("span"); box.className = "vid-thumb vid-on"; box.append(frame);
+  const card = document.createElement("div"); card.className = "vid playing";
+  card.append(box, btn.querySelector(".vid-t"), btn.querySelector(".vid-c"));
+  const yt = document.createElement("a"); yt.className = "vid-yt"; yt.href = `https://www.youtube.com/watch?v=${id}`; yt.target = "_blank"; yt.rel = "noopener"; yt.textContent = "Open on YouTube ↗";
+  card.append(yt);
+  thumb.remove(); btn.replaceWith(card);
+}
+document.addEventListener("click", e => { const b = e.target.closest("button.vid"); if (b) playVideo(b); });
+
 function initMermaid() {
   mermaid.initialize({
     startOnLoad: false, securityLevel: "strict", theme: "base",
@@ -110,7 +140,7 @@ function markNav(page) {
     if (a.closest(".side-nav")) a.classList.toggle("done", isDone(a.dataset.page));
   });
   document.querySelectorAll(".bottombar [data-group]").forEach(a => a.classList.toggle("on", a.dataset.group === grp));
-  const moreOn = ["pyqs", "style"].includes(page);
+  const moreOn = ["pyqs", "style", "videos"].includes(page);
   $("moreBtn").classList.toggle("on", moreOn);
 }
 
@@ -131,13 +161,14 @@ updateCountdowns();
 setInterval(updateCountdowns, 60 * 60 * 1000);
 
 /* ---------- routing ---------- */
+// "#videos/unit2" opens a page and scrolls to the element with id "v-unit2".
 function route() {
-  let page = location.hash.slice(1) || "home";
+  let [page, sub] = location.hash.slice(1).split("/");
   if (!byId[page]) page = "home";
-  show(page);
+  show(page, sub);
 }
 
-function show(page) {
+function show(page, sub) {
   const first = current === null;
   current = page;
   closeSheet();
@@ -149,10 +180,10 @@ function show(page) {
   if (!first && !reduceMotion) { sec.classList.remove("enter"); void sec.offsetWidth; sec.classList.add("enter"); }
   window.scrollTo(0, 0);
   if (home) { document.title = "DIP End-Sem Prep · MJPRU CS-403T"; renderHome(); heroAnim.start(); }
-  else { heroAnim.stop(); renderDoc(page); }
+  else { heroAnim.stop(); renderDoc(page, false, sub); }
 }
 
-async function renderDoc(page, keepScroll) {
+async function renderDoc(page, keepScroll, sub) {
   const doc = $("doc"), y = scrollY;
   if (!cache[page]) doc.innerHTML = '<p class="loading">Loading…</p>';
   try {
@@ -162,7 +193,7 @@ async function renderDoc(page, keepScroll) {
     return;
   }
   if (current !== page) return;
-  doc.innerHTML = marked.parse(boxes(cache[page]));
+  doc.innerHTML = marked.parse(boxes(videos(cache[page])));
   doc.querySelectorAll("h2, h3").forEach(h => { if (!h.id) h.id = h.textContent.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60); });
   doc.querySelectorAll("table").forEach(t => t.setAttribute("tabindex", "0"));
   const h1 = doc.querySelector("h1");
@@ -177,6 +208,8 @@ async function renderDoc(page, keepScroll) {
   renderPager(page);
   window.dipIcons && window.dipIcons();
   if (keepScroll) window.scrollTo(0, y);
+  const target = sub && $("v-" + sub);
+  if (target) target.scrollIntoView();
 
   initMermaid();
   try { await mermaid.run({ nodes: doc.querySelectorAll("pre.mermaid") }); } catch (e) { console.warn(e); }
